@@ -7,9 +7,9 @@ Imports System.Collections.Generic
 Module Program
 
     Class MappingEntry
-        Public Feld As String
-        Public CDASH As String
-        Public MC_Wert As String
+        Public Field As String
+        Public MappedField As String
+        Public Ref_Value As String
     End Class
 
     Sub Main()
@@ -25,14 +25,14 @@ Module Program
 
         Using conn As New OleDbConnection(connStr)
             conn.Open()
-            Dim sql As String = "SELECT Feld, CDASH_Feldname, MC_Wert FROM MappingTable WHERE Formname = '" & formname & "'"
+            Dim sql As String = "SELECT Field, MappedField_Feldname, Ref_Value FROM MappingTable WHERE Formname = '" & formname & "'"
             Using cmd As New OleDbCommand(sql, conn)
                 Using reader As OleDbDataReader = cmd.ExecuteReader()
                     While reader.Read()
                         Dim entry As New MappingEntry()
-                        entry.Feld = reader("Feld").ToString().Trim()
-                        entry.CDASH = reader("CDASH_Feldname").ToString().Trim()
-                        entry.MC_Wert = reader("MC_Wert").ToString().Trim()
+                        entry.Field = reader("Field").ToString().Trim()
+                        entry MappedField = reader( "MappedField_Feldname").ToString().Trim()
+                        entry.Ref_Value = reader("Ref_Value").ToString().Trim()
                         allMappings.Add(entry)
                     End While
                 End Using
@@ -47,10 +47,10 @@ Module Program
         ' === 3. Group mappings by field ===
         Dim feldGroups As New Dictionary(Of String, List(Of MappingEntry))
         For Each m As MappingEntry In allMappings
-            If Not feldGroups.ContainsKey(m.Feld) Then
-                feldGroups(m.Feld) = New List(Of MappingEntry)
+            If Not feldGroups.ContainsKey(m.Field) Then
+                feldGroups(m.Field) = New List(Of MappingEntry)
             End If
-            feldGroups(m.Feld).Add(m)
+            feldGroups(m.Field).Add(m)
         Next
 
         ' === 4. Apply replacements ===
@@ -68,10 +68,10 @@ Module Program
 
                 ' Try 1:1 mapping
                 For Each entry As MappingEntry In entryGroup
-                    If entry.MC_Wert = "" Then
-                        Dim newTag As String = "<p><b>" & entry.CDASH & "</b>"
+                    If entry.Ref_Value = "" Then
+                        Dim newTag As String = "<p><b>" & entry MappedField & "</b>"
                         currentLine = currentLine.Replace(searchTag, newTag)
-                        log.Add("Line " & (i + 1).ToString() & ": [1:1] Replaced '" & feldKey & "' with '" & entry.CDASH & "'")
+                        log.Add("Line " & (i + 1).ToString() & ": [1:1] Replaced '" & feldKey & "' with '" & entry MappedField & "'")
                         lineChanged = True
                         GoTo NextLine
                     End If
@@ -86,10 +86,10 @@ Module Program
                     Dim valueRaw As String = If(valueEnd > -1, valuePart.Substring(0, valueEnd).Trim(), valuePart.Trim())
 
                     For Each entry As MappingEntry In entryGroup
-                        If entry.MC_Wert = valueRaw Then
-                            Dim newTag As String = "<p><b>" & entry.CDASH & "</b>"
+                        If entry.Ref_Value = valueRaw Then
+                            Dim newTag As String = "<p><b>" & entry MappedField & "</b>"
                             currentLine = currentLine.Replace(searchTag, newTag)
-                            log.Add("Line " & (i + 1).ToString() & ": [1:N] Replaced '" & feldKey & "' with '" & entry.CDASH & "' (Value: " & valueRaw & ")")
+                            log.Add("Line " & (i + 1).ToString() & ": [1:N] Replaced '" & feldKey & "' with '" & entry MappedField & "' (Value: " & valueRaw & ")")
                             lineChanged = True
                             GoTo NextLine
                         End If
