@@ -81,7 +81,7 @@ vbc /target:exe /out:FDFRemapper.exe Program.vb
 - [x] `[NO CHANGE]` logging
 - [x] Suffix-based mapping with whitelist
 - [x] Console-based `debugMode` & File path validation
-- [ ] Restructure into frames (multiple files)
+- [ ] Split into components
 - [ ] GUI (WinForms)
 - [ ] Batch `.fdf` folder processing
 - [ ] ASP.NET internal tool
