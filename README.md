@@ -1,31 +1,43 @@
 
-# 🧠 FDF Remapper – Stage 3 Version (VB.NET / .NET 2.0)
+# 🧠 FDF Remapper（fdfFieldReplacer） – Stage 4 Version (VB.NET / .NET 2.0)
 
-This is the third-stage version of the FDF Remapper tool — a VB.NET console application for replacing field names in `.fdf` form files using mappings from a local Access database.
+A VB.NET 2.0 compatible tool for safely remapping field names in `.fdf` files using mappings from an Access `.mdb` database.
 
-In this version, the tool becomes production-grade, supporting value-based replacements, suffix-based mapping, and full logging.
+This tool was originally developed under constrained company workstation conditions (Windows XP, Notepad++ v6.8, no IDE) and later brought into Git version control manually. Therefore, early stages were linear and patched retrospectively.
+
+---
+
+## ✅ Current Features (Latest Stage: `stage4`)
+
+- ✅ 1:1 and 1:N field remapping based on Access DB mappings
+- ✅ Suffix support (e.g., `FieldName_2`, `FieldName_3`) works on **all fields**, not only selected keys
+- ✅ `[NO CHANGE]` logging for unmatched tags
+- ✅ Console-based `debugMode` for step-by-step output
+- ✅ File path validation: ensures both `.fdf` and `.mdb` exist before execution
+- ✅ Compatible with `.NET Framework 2.0`, executable on XP/Win7 machines
+
+---
+🔧 Modular refactoring (multi-file architecture) and future GUI integrations are planned for separate development branches and are not included in the main stage4 tag.
 
 ---
 
-## ✅ New Features in Stage 3
+## 📜 Development History (Version Tags)
 
-- ✅ Full logging, including `[NO CHANGE]` entries for unmatched lines
-- ✅ Supports both:
-  - **1:1 mappings** (direct tag replacement)
-  - **1:N mappings** (based on `Value:` content)
-- ✅ Adds support for fields with numeric suffixes:
-  - Example: `Field_2` → `MappedField_2`
-- ✅ Suffix replacement is restricted to a defined set of base keys:
-  - `"Field"`, `"Visit"`, `"AENo"`
-
----
+| Tag        | Description |
+|------------|-------------|
+| `Stage1`   | Basic 1:1 and 1:N field remapping, no logging for unchanged |
+| `Stage2`   | Introduced `[NO CHANGE]` log entries |
+| `Stage3`   | Added regex-based suffix matching for **all fields** (not only `DocNum`, `VisNr`, `UE_Nr`) |
+| `Stage4`(current)   | Added `debugMode` and file path validation. Final version before modular restructuring |
+ 
+ The project was version-tagged manually after development, and legacy `.vb` files have been archived in `/Legacy_Stages/`
 
 ## 🧾 Sample Log Output
 
 ```
 Line 10: [1:1] Replaced 'Field' with 'StandardField'
+Line 13: [1:1] Replaced 'Field_3' with 'StandardField_3' 
 Line 12: [1:N] Replaced 'Visit' with 'VISITID' (Value: Screening)
-Line 13: [1:1] Replaced 'AENo_3' with 'AESEQ_3'
 Line 14: [NO CHANGE] Tag found in line: Unknown_1
 Line 15: [NO CHANGE] no tag in line
 ```
@@ -58,20 +70,8 @@ vbc /target:exe /out:FDFRemapper.exe Program.vb
 3. Replaces matching tags using:
    - Exact key match (1:1)
    - Value match (1:N)
-   - Suffix-aware remapping for allowed fields
+   - Regex for suffix detection (e.g., `_2`, `_3`) is automatically applied across all fields that exist in the mapping table.
 4. Logs every change, and unmatched tags
-
----
-
-## 🎯 Suffix Mapping Rules
-
-Only fields that start with these base keys will support `_2`, `_3`, etc.:
-
-- `"Field"`
-- `"Visit"`
-- `"AENo"`
-
-These must exist in the Access DB **without** the suffix — suffixes are applied dynamically.
 
 ---
 
@@ -80,6 +80,8 @@ These must exist in the Access DB **without** the suffix — suffixes are applie
 - [x] 1:1 and 1:N mapping logic
 - [x] `[NO CHANGE]` logging
 - [x] Suffix-based mapping with whitelist
+- [x] Console-based `debugMode` & File path validation
+- [ ] Restructure into frames (multiple files)
 - [ ] GUI (WinForms)
 - [ ] Batch `.fdf` folder processing
 - [ ] ASP.NET internal tool
@@ -90,3 +92,10 @@ These must exist in the Access DB **without** the suffix — suffixes are applie
 
 - Built with VB.NET (.NET Framework 2.0)
 - Works on Windows XP, Windows 7
+
+---
+
+## 🔧 Maintainer's Comment
+
+This utility was initially created as a production aid, then reverse-documented and split into logical stages for GitHub publication.  
+Stage4 represents the last monolithic version before structural improvements are handed off to future contributors or new branches.

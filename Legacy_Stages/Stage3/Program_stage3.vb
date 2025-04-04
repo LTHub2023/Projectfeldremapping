@@ -20,36 +20,7 @@ Module Program
         Dim formname As String = "FormName"
         Dim logPath As String = Path.ChangeExtension(outputPath, ".log")
 
-        ' Check if the FDF file and database file exist
-		If Not System.IO.File.Exists(fdfFilePath) Then
-			Console.WriteLine("❌ FDF file not found: " & fdfFilePath)
-			Console.ReadLine()
-			Return ' This stops the program here
-		End If
-
-		If Not System.IO.File.Exists(dbPath) Then
-			Console.WriteLine("❌ Database file not found: " & dbPath)
-			Console.ReadLine()
-			Return ' This stops the program here
-		End If
-		
-        ' Debug mode
-        ' Set to True to enable debug output
-        ' Set to False to disable debug output
-        ' This is a simple way to control debug output without using a full logging framework    
-		Dim debugMode As Boolean = true ' Set to False to disable debug output
-
-        If debugMode Then Console.WriteLine("Opening database and loading mappings...")
-		
-		If debugMode Then
-			Console.WriteLine("FDF file path: " & fdfFilePath) ' show tha path
-			Console.WriteLine("Output path: " & outputPath) ' show tha path
-			Console.WriteLine("DB path: " & dbPath) ' show tha path
-		End If
-
-        If debugMode Then Console.WriteLine("Form name: " & formname) ' show tha path
-        If debugMode Then Console.WriteLine("Log path: " & logPath) ' show tha path
-        If debugMode Then Console.WriteLine("Loading mappings from Access DB...")
+        Dim specialKeys As New List(Of String)(New String() {"Field", "Visit", "AENr"})
 
         ' === 1. Load mappings from Access DB ===
         Dim allMappings As New List(Of MappingEntry)
@@ -70,15 +41,12 @@ Module Program
                 End Using
             End Using
         End Using
-        
-        If debugMode Then Console.WriteLine("Mappings loaded: " & allMappings.Count.ToString()) 
 
         ' === 2. Read FDF file lines into List(Of String) ===
         Dim linesArray() As String = File.ReadAllLines(fdfFilePath)
         Dim lines As New List(Of String)(linesArray)
         Dim log As New List(Of String)
-        if debugMode Then Console.WriteLine("FDF file lines loaded: " & lines.Count.ToString()) 
-        
+
         ' === 3. Group mappings by Field manually ===
         Dim fieldGroups As New Dictionary(Of String, List(Of MappingEntry))
         Dim m As MappingEntry
@@ -88,7 +56,6 @@ Module Program
             End If
             fieldGroups(m.Field).Add(m)
         Next
-        If debugMode Then Console.WriteLine("Grouped mappings by field.")
 
         ' === 4. Apply replacements ===
         For i As Integer = 0 To lines.Count - 1
@@ -106,7 +73,6 @@ Module Program
                     Dim suffix As String = ""
                     If suffixMatch.Groups.Count > 1 AndAlso suffixMatch.Groups(1).Success Then
                         suffix = suffixMatch.Groups(1).Value
-                        If debugMode Then Console.WriteLine("    Suffix detected: " & suffix)
                     End If
 
                     ' 1:1 replacement (no Ref_Value)
@@ -123,7 +89,6 @@ Module Program
                         End If
                     Next
 
-                    ' 1:NO replacement (with MC_Wert)
                     If Not replaced Then
                         Dim valueMarker As String = "Value: "
                         Dim valueIndex As Integer = currentLine.IndexOf(valueMarker)
@@ -136,14 +101,12 @@ Module Program
                             Else
                                 valueRaw = valuePart.Trim()
                             End If
-                            If debugMode Then Console.WriteLine("    Value detected: " & valueRaw)
-                            ' Check if the value matches any Ref_Value in the group
+
                             For Each entry In entryGroup
                                 If entry.Ref_Value = valueRaw Then
                                     Dim newTag As String = "<p><b>" & entry.MappedField & suffix & "</b>"
                                     currentLine = currentLine.Replace(matchedTag, newTag)
                                     log.Add("Line " & (i + 1).ToString() & ": [1:N] Replaced '" & fieldKey & suffix & "' with '" & entry.MappedField & suffix & "' (Value: " & valueRaw & ")")
-                                    If debugMode Then Console.WriteLine("    [1:N] Replacement applied")
                                     lineChanged = True
                                     Exit For
                                 End If
@@ -162,10 +125,8 @@ Module Program
                     If tagEnd > tagStart Then
                         Dim tagContent As String = currentLine.Substring(tagStart + 6, tagEnd - (tagStart + 6))
                         log.Add("Line " & (i + 1).ToString() & ": [NO CHANGE] Tag found in line: " & tagContent)
-                        If debugMode Then Console.WriteLine("    [NO CHANGE] Tag: " & tagContent)
                     Else
                         log.Add("Line " & (i + 1).ToString() & ": [NO CHANGE]")
-                        If debugMode Then Console.WriteLine("    [NO CHANGE] No tag found")    
                     End If
                 Else
                     log.Add("Line " & (i + 1).ToString() & ": [NO CHANGE]")
