@@ -25,10 +25,10 @@ This tool was originally developed under constrained company workstation conditi
 
 | Tag        | Description |
 |------------|-------------|
-| `Stage1`   | Basic 1:1 and 1:N field remapping, no logging for unchanged |
-| `Stage2`   | Introduced `[NO CHANGE]` log entries |
-| `Stage3`   | Added regex-based suffix matching for **all fields** (not only `DocNum`, `VisNr`, `UE_Nr`) |
-| `Stage4`(current)   | Added `debugMode` and file path validation. Final version before modular restructuring |
+| `stage1`   | Basic 1:1 and 1:N field remapping, no logging for unchanged |
+| `stage2`   | Introduced `[NO CHANGE]` log entries |
+| `stage3`   | Added regex-based suffix matching for **all fields** (not only `DocNum`, `VisNr`, `UE_Nr`) |
+| `stage4`(current)   | Added `debugMode` and file path validation. Final version before modular restructuring |
  
  The project was version-tagged manually after development, and legacy `.vb` files have been archived in `/Legacy_Stages/`
 
